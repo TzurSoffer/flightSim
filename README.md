@@ -1,6 +1,6 @@
-# Navion Airplane Simulation
-Simple aero model of the Navion airplane solved with home brew six degree of freedom 6-DOF solverr.
-Everything is written in pure Python. Minor dependance in Pygame.
+# Airplane Simulation
+Simple aero model of the Navion airplane solved with home brew six degree of freedom (6-DOF) solver.
+Everything is written in pure Python. Minor dependance on Pygame.
 
 ## Theory of operation
 In the future.
@@ -10,8 +10,8 @@ In the future.
 2. To interact with the controller during development (Software In The Loop). This eliminates the needs for any hardware during early stages of controller develop.
 
 ## What does it simulate / demonstrate
-- Movement of robotic with three sections in 3D space.
-- Robot arm will follow mouse position (red sphere).
+- Linear aerodinamics with secondary effects.
+- Movement in 3D space.
 
 ### Take off in real-time and 3D wireframe graphics.
 ![alt text](./figures/takeoff_20fps.gif "")
@@ -35,6 +35,6 @@ https://github.com/mrGSOF/GSOF_3dWireFrame
 - Install requirements `pip install -r requirements.txt`
 - Clone and install GSOF_3dWireFrame (`pip install .` or `setup.bat`)
 - Clone roboticArmSim
-- run `python Example_RoboticArm.py`
+- run `python Simulation.py`
 
-Interactive operation is supported using the mouse.
+Interactive operation is supported using the mouse and keyboard.
