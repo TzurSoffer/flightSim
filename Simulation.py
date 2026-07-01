@@ -150,19 +150,28 @@ class CockpitView():
                                 wowRight_b=wow.right)
 
         cameraMode = "follow"   
+        #cameraMode = "static"   
+        #cameraMode = "chase"   
+        #cameraMode = "pilot"   
         if cameraMode == "chase":
-            cameraDistance = 500
+            cameraDistance = 400
             worldState = WorldState(translate=(-ins.east/5, -alt_ft, +ins.north/5), rotate=(0,heading,0)) #< Chase plane
             self.world.update( time, planeState, worldState)
-            self.world.world.translate(0,0,-cameraDistance)
+            self.world.world.translate(0,-40,-cameraDistance)
+
+        elif cameraMode == "pilot":
+            cameraDistance = -60 #< Move forward
+            worldState = WorldState(translate=(-ins.east/5, -alt_ft, +ins.north/5), rotate=(pitch,heading,roll)) #< Pilot
+            self.world.update( time, planeState, worldState)
+            self.world.world.translate(0,0*-10,0*-cameraDistance)
 
         elif cameraMode == "follow":
-            cameraDistance = 600
+            cameraDistance = 1000
             worldState = WorldState(translate=(-ins.east/5,-alt_ft, ins.north/5 -cameraDistance)) #< Camera relative to airplane
             self.world.update( time, planeState, worldState)
 
         elif cameraMode == "static":
-            cameraDistance = 500
+            cameraDistance = 900
             worldState = WorldState(translate=(0, -10, -cameraDistance), rotate=(0,0,0))
             self.world.update( time, planeState, worldState)
 
