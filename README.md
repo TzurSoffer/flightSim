@@ -12,6 +12,8 @@ In the future.
 ## What does it simulate / demonstrate
 - Linear aerodinamics with secondary effects.
 - Movement in 3D space.
+- Support four views (chase, pilot, follow and static).
+- Animation of gears, engine plume and weight on wheels.
 
 ### Take off in real-time and 3D wireframe graphics.
 ![alt text](./figures/takeoff_20fps.gif "")
@@ -33,8 +35,9 @@ https://github.com/mrGSOF/GSOF_3dWireFrame
 
 ## Running instructions
 - Install requirements `pip install -r requirements.txt`
-- Clone and install GSOF_3dWireFrame (`pip install .` or `setup.bat`)
-- Clone roboticArmSim
+- or run `pip install GSOF_3dWireFrame`
+- Clone and install GSOF_Cockpit (`pip install .` or `setup.bat`)
+- Clone flightSim
 - run `python Simulation.py`
 
 Interactive operation is supported using the mouse and keyboard.

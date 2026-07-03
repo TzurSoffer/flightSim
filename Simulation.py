@@ -221,6 +221,8 @@ if __name__ == "__main__":
         ("Press 'Z' and 'C' to control rudder, use 'X' to reset")
         print("Press 'Q' and 'A' to increase and decrease throttle")
         print("Press 'G' and 'B' to retract and extend landing gears")
+        print("Press 'Z' and 'C' to trim rudder")
+        print("Press '1' to '3' to select point of view")
 
     # Initialise screen.
     BG_color = COLOR.DARK
