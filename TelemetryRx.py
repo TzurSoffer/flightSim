@@ -51,7 +51,7 @@ class Data():
         self.time_Z1 = time.time()
         self.dt = 0.1
         self.data = Buses()
-        self.navion = AeroModel(dt=0.05, altInit_m=10.0, speed_fps=220.0, weight_lbs=2750, units="Metric")
+        self.navion = AeroModel(dt=0.05, altInit_m=20.0, speed_fps=220.0, weight_lbs=2750, units="Metric")
         self.test   = TestModel(dt=0.05, altInit_m=100.0, speed_fps=220.0, weight_lbs=2750, units="Metric")
         self.rud = 0.0
         
@@ -145,7 +145,7 @@ class Data():
         ins.mach = airSpeed*0.002
 
         ### Ground collision detection
-        if ins.height < 0.2:
+        if ins.height < 0.0:
             mdl.position.z = 0.0
             mdl.Ve.z = min(0.0, mdl.Ve.z) #< Only negative (up)
             mdl.W.p = 0.0

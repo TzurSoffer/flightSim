@@ -8,7 +8,7 @@
 """
 
 import sys, os, random
-from math import pi, cos, sin, sqrt
+from math import pi, cos, sin, atan2, sqrt
 from GSOF_Cockpit.Aerospace import ArtificialHorizon as AH
 from GSOF_Cockpit.Aerospace import TurnCoordinator_Analog as TC
 from GSOF_Cockpit.Aerospace import AltMeter_Analog as ALT
@@ -30,6 +30,11 @@ from display.F16_View import F16_View, PlaneState, WorldState
 class CockpitView():
     """Constructs the gauges screen"""
     def __init__(self, screen, pos=(0,0), scale=1.0, colorBG=COLOR.BLACK, gap=0, folder='./'):
+        self.cameraMode = "follow"   
+        #self.cameraMode = "static"   
+        #self.cameraMode = "chase"   
+        #self.cameraMode = "pilot"   
+
         self.screen = screen
         self.colorBG = colorBG
 
@@ -141,7 +146,8 @@ class CockpitView():
 
         ### MODEL TO 3D-GRAPHICS
         ### X-FOWARD, Y-RIGHT, Z-DOWN TO X-RIGHT, Z-UP
-        planeState = PlaneState(north=-ins.north/5, east=ins.east/5, up=alt_ft,
+        posFact = 2
+        planeState = PlaneState(north=ins.north/posFact, east=ins.east/posFact, up=alt_ft,
                                 heading_d=-heading*180/pi, pitch_d=pitch*180/pi, roll_d=-roll*180/pi,
                                 throttle=throttle,
                                 gearsDown_b=cmds.gearExtendCmd_b,
@@ -149,32 +155,33 @@ class CockpitView():
                                 wowLeft_b=wow.left,
                                 wowRight_b=wow.right)
 
-        cameraMode = "follow"   
-        #cameraMode = "static"   
-        #cameraMode = "chase"   
-        #cameraMode = "pilot"   
-        if cameraMode == "chase":
+        if self.cameraMode == "chase":
             cameraDistance = 400
-            worldState = WorldState(translate=(-ins.east/5, -alt_ft, +ins.north/5), rotate=(0,heading,0)) #< Chase plane
+            worldState = WorldState(translate=(-ins.east/posFact, -alt_ft, +ins.north/posFact), rotate=(0,heading,0)) #< Chase plane
             self.world.update( time, planeState, worldState)
             self.world.world.translate(0,-40,-cameraDistance)
 
-        elif cameraMode == "pilot":
-            cameraDistance = -60 #< Move forward
-            worldState = WorldState(translate=(-ins.east/5, -alt_ft, +ins.north/5), rotate=(pitch,heading,roll)) #< Pilot
+        elif self.cameraMode == "pilot":
+            cameraDistance = -50 #< Move forward
+            worldState = WorldState(translate=(-ins.east/posFact, -alt_ft, +ins.north/posFact))
             self.world.update( time, planeState, worldState)
-            self.world.world.translate(0,0*-10,0*-cameraDistance)
+            self.world.world.rotate(0,heading,0)
+            self.world.world.rotate(-pitch,0,0)
+            self.world.world.rotate(0,0,roll)
+            self.world.world.translate(0,-50,-cameraDistance)
 
-        elif cameraMode == "follow":
+        elif self.cameraMode == "follow":
             cameraDistance = 1000
-            worldState = WorldState(translate=(-ins.east/5,-alt_ft, ins.north/5 -cameraDistance)) #< Camera relative to airplane
+            worldState = WorldState(translate=(-ins.east/posFact, -alt_ft, ins.north/posFact -cameraDistance)) #< Camera relative to airplane
             self.world.update( time, planeState, worldState)
 
-        elif cameraMode == "static":
-            cameraDistance = 900
-            worldState = WorldState(translate=(0, -10, -cameraDistance), rotate=(0,0,0))
-            self.world.update( time, planeState, worldState)
-
+        elif self.cameraMode == "static":
+            cameraDistance = 0
+            heading = atan2(ins.east, ins.north +0*cameraDistance)
+            distance = sqrt(((ins.east/posFact)**2) +((ins.north/posFact)**2))
+            elevation = atan2(alt_ft, distance)
+            worldState = WorldState(translate=(0, -20, -cameraDistance), rotate=(-elevation, heading, 0))
+            self.world.update( time, planeState, worldState) 
         
         self.horizon.update( roll, pitch )
         self.turn.update( -self.turnRate_rps, sideslip )
@@ -205,7 +212,7 @@ class CockpitView():
         self.stck.draw()
 
 if __name__ == "__main__":
-    import time
+    import time, pygame
     from TelemetryRx import Data
     def help(mode):
         print("Simulation mode: %s"%mode)
@@ -236,6 +243,16 @@ if __name__ == "__main__":
     while True:
         ###Loop to update gauges
         #T0 = time.time()
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_1]:
+            cockpit.cameraMode = "chase"
+        elif keys[pygame.K_2]:
+            cockpit.cameraMode = "pilot"
+        elif keys[pygame.K_3]:
+            cockpit.cameraMode = "follow"
+        elif keys[pygame.K_4]:
+            cockpit.cameraMode = "static"
+        
         newData = data.getData(test=mode)
         calcFrame -= 1
         if calcFrame == 0:

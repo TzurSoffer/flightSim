@@ -61,8 +61,10 @@ class F16_View():
         axis = Object(filename=os.path.join(objPath,"Axis.json"), color=(10,10,10), name="WorldAxis" )\
            .scale(30.0)\
            .setOrigin()
-        ground = Assembly(objects=(net, axis), name="Ground").translate(-200, 0, 0).setOrigin()    
-        self.world = Assembly(objects=(ground, self.plane), name="World")    
+        self.world = Assembly(
+            objects=(Assembly(objects=(net, axis), name="Ground").translate(0, 0, 0).setOrigin(),
+                     Assembly(objects=[self.plane], name="Plane").translate(0,35,0).setOrigin()),
+            name="World")    
         self.world.rotate(0, 0, 0).translate(0,0,0).setOrigin()
 
         self.model = Model3D(

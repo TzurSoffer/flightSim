@@ -101,7 +101,7 @@ class F16(Assembly):
                      z= roll*degToRad )
 
     def setPosition(self, north, east, up) -> None:
-        self.translate(east, up, north)
+        self.translate(east, up, -north)
 
     def setExahustPlume(self, plume) -> None:
         if plume > 1:
