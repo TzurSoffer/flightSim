@@ -8,7 +8,7 @@
 """
 
 import sys, os, random
-from math import pi, cos, sin, atan2, sqrt
+from math import pi, cos, sin, atan, atan2, sqrt
 from GSOF_Cockpit.Aerospace import ArtificialHorizon as AH
 from GSOF_Cockpit.Aerospace import TurnCoordinator_Analog as TC
 from GSOF_Cockpit.Aerospace import AltMeter_Analog as ALT
@@ -146,8 +146,8 @@ class CockpitView():
 
         ### MODEL TO 3D-GRAPHICS
         ### X-FOWARD, Y-RIGHT, Z-DOWN TO X-RIGHT, Z-UP
-        posFact = 2
-        planeState = PlaneState(north=ins.north/posFact, east=ins.east/posFact, up=alt_ft,
+        posFact = 1
+        planeState = PlaneState(north=ins.north, east=ins.east, up=ins.height,
                                 heading_d=-heading*180/pi, pitch_d=pitch*180/pi, roll_d=-roll*180/pi,
                                 throttle=throttle,
                                 gearsDown_b=cmds.gearExtendCmd_b,
@@ -157,13 +157,13 @@ class CockpitView():
 
         if self.cameraMode == "chase":
             cameraDistance = 400
-            worldState = WorldState(translate=(-ins.east/posFact, -alt_ft, +ins.north/posFact), rotate=(0,heading,0)) #< Chase plane
+            worldState = WorldState(translate=(-ins.east, -ins.height, +ins.north), rotate=(0,heading,0)) #< Chase plane
             self.world.update( time, planeState, worldState)
             self.world.world.translate(0,-40,-cameraDistance)
 
         elif self.cameraMode == "pilot":
             cameraDistance = -50 #< Move forward
-            worldState = WorldState(translate=(-ins.east/posFact, -alt_ft, +ins.north/posFact))
+            worldState = WorldState(translate=(-ins.east, -ins.height, ins.north))
             self.world.update( time, planeState, worldState)
             self.world.world.rotate(0,heading,0)
             self.world.world.rotate(-pitch,0,0)
@@ -172,16 +172,27 @@ class CockpitView():
 
         elif self.cameraMode == "follow":
             cameraDistance = 1000
-            worldState = WorldState(translate=(-ins.east/posFact, -alt_ft, ins.north/posFact -cameraDistance)) #< Camera relative to airplane
+            worldState = WorldState(translate=(-ins.east, -ins.height, ins.north -cameraDistance)) #< Camera relative to airplane
             self.world.update( time, planeState, worldState)
 
+        elif self.cameraMode == "above":
+            cameraAltitude = 10000
+            worldState = WorldState(translate=(-ins.east, -(ins.height +cameraAltitude), ins.north)) #< Camera follow from above
+            self.world.update( time, planeState, worldState)
+            self.world.world.rotate(pi/2,0,0) #< Look down
+
         elif self.cameraMode == "static":
-            cameraDistance = 0
-            heading = atan2(ins.east, ins.north +0*cameraDistance)
-            distance = sqrt(((ins.east/posFact)**2) +((ins.north/posFact)**2))
-            elevation = atan2(alt_ft, distance)
-            worldState = WorldState(translate=(0, -20, -cameraDistance), rotate=(-elevation, heading, 0))
+            azimuth = atan2(ins.east, ins.north)
+            distance = sqrt((ins.east**2) +(ins.north**2))
+            if abs(distance) > 0.01: 
+                elevation = atan(ins.height/distance)
+            else:
+                elevation = pi/2
+            worldState = WorldState(translate=(0, 0, 0),rotate=(0, 0, 0)) #< TODO DEBUG ROTATION ORDER
             self.world.update( time, planeState, worldState) 
+            self.world.world.rotate(0, azimuth, 0)    #< 1st azimuth
+            self.world.world.rotate(-elevation, 0, 0) #< 2nd elevation
+            self.world.world.translate(0, -50, 0)     #< 3rd camera height
         
         self.horizon.update( roll, pitch )
         self.turn.update( -self.turnRate_rps, sideslip )
@@ -218,10 +229,9 @@ if __name__ == "__main__":
         print("Simulation mode: %s"%mode)
         print("Move mouse to control elevator and ailerons")
 
-        ("Press 'Z' and 'C' to control rudder, use 'X' to reset")
         print("Press 'Q' and 'A' to increase and decrease throttle")
         print("Press 'G' and 'B' to retract and extend landing gears")
-        print("Press 'Z' and 'C' to trim rudder")
+        print("Press 'Z' and 'C' to trim rudder, 'X' to reset")
         print("Press '1' to '3' to select point of view")
 
     # Initialise screen.
@@ -253,6 +263,8 @@ if __name__ == "__main__":
         elif keys[pygame.K_3]:
             cockpit.cameraMode = "follow"
         elif keys[pygame.K_4]:
+            cockpit.cameraMode = "above"
+        elif keys[pygame.K_5]:
             cockpit.cameraMode = "static"
         
         newData = data.getData(test=mode)

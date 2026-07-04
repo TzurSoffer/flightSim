@@ -1,4 +1,4 @@
-from math import pi, sin, asin, cos, atan2, sqrt
+from math import pi, sin, asin, cos, atan, atan2, sqrt
 from typing import Self, TypeVar
 
 Q = TypeVar('Q', bound='Qtrn')
@@ -242,7 +242,7 @@ class Attitude():
         R33 = dcm[2][2]
         self.yaw_r   = atan2(R21,R11)
         self.roll_r  = atan2(R32,R33)
-        self.pitch_r = atan2(-R31, sqrt(R32**2 +R33**2) )
+        self.pitch_r = atan(-R31/sqrt(R32**2 +R33**2) )
 
     def __str__(self) -> str:
         s = ""

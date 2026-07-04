@@ -56,8 +56,8 @@ class F16_View():
         ###Initialise the gauges.
         objPath = os.path.join(folder, "objects")
         self.plane = F16(folder=folder)
-        net = Object(obj=Objects.net(25,20), color=(0,100,0), name="NET")\
-                 .setCenter(pos=(0,0,0), rotate=(PI/2, 0, 0), scale=0.4 )
+        net = Object(obj=Objects.net(40,40), color=(0,100,0), name="NET")\
+                 .setCenter(pos=(-50, 4050, 0), rotate=(PI/2, 0, 0), scale=4.0 )
         axis = Object(filename=os.path.join(objPath,"Axis.json"), color=(10,10,10), name="WorldAxis" )\
            .scale(30.0)\
            .setOrigin()
@@ -84,7 +84,7 @@ class F16_View():
 
     def _updateWorld(self, scale, rotation, translation) -> None:
         """ """
-        #self.world.transform(scale=scale, rotate=rotation, translate=translation)
+        #self.world.transform(scale=scale, rotate=rotation, translate=translation) #< TODO BUG IN ROTATION ORDER
         self.world.translate(*translation).rotate(*rotation) 
         #self.world.rotate(*rotation).translate(*translation) 
 
