@@ -159,7 +159,7 @@ class CockpitView():
             cameraDistance = 400
             worldState = WorldState(translate=(-ins.east, -ins.height, +ins.north), rotate=(0,heading,0)) #< Chase plane
             self.world.update( time, planeState, worldState)
-            self.world.world.translate(0,-40,-cameraDistance)
+            self.world.world.translate(0,-70,-cameraDistance)
 
         elif self.cameraMode == "pilot":
             cameraDistance = -50 #< Move forward
@@ -172,7 +172,7 @@ class CockpitView():
 
         elif self.cameraMode == "follow":
             cameraDistance = 1000
-            worldState = WorldState(translate=(-ins.east, -ins.height, ins.north -cameraDistance)) #< Camera relative to airplane
+            worldState = WorldState(translate=(-ins.east, -(ins.height +50), ins.north -cameraDistance)) #< Camera relative to airplane
             self.world.update( time, planeState, worldState)
 
         elif self.cameraMode == "above":

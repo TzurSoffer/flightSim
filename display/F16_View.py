@@ -61,9 +61,16 @@ class F16_View():
         axis = Object(filename=os.path.join(objPath,"Axis.json"), color=(10,10,10), name="WorldAxis" )\
            .scale(30.0)\
            .setOrigin()
+
+        sun = Object(obj=Objects.sphere(500, 15, color=(225,220,50)), name="SUN")
+        sun.setCenter(scale=0.15, rotate=(PI/2,0,0))
+        sun.translate(0, 3000, 0)  #< More up (Y) and forward (Z) to the center of the net 
+        sun.setOrigin()
+
         self.world = Assembly(
             objects=(Assembly(objects=(net, axis), name="Ground").translate(0, 0, 0).setOrigin(),
-                     Assembly(objects=[self.plane], name="Plane").translate(0,35,0).setOrigin()),
+                     Assembly(objects=[self.plane], name="Plane").translate(0,35,0).setOrigin(),
+                     sun),
             name="World")    
         self.world.rotate(0, 0, 0).translate(0,0,0).setOrigin()
 
