@@ -79,7 +79,8 @@ class F16_View():
         pos=pos,
         size=size,
         world=self.world,
-        bodyImage=frame
+        bodyImage=frame,
+        scale=500, minViewDistance=50, maxViewDistance=5000
         )
 
     def update(self, time, planeState, worldState) -> None:
