@@ -22,3 +22,5 @@ class Atmos():
         """Returns the density of air (kg/m3)"""
         p = Atmos.getPa(hae_m)
         return p/(0.2869*(temp_C +273.1))
+
+RHO_0 = Atmos.getRho(hae_m=0.0, temp_C=25.0)

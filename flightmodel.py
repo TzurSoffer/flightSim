@@ -4,10 +4,11 @@
 ##
 ##==============================================================================
 
-from math import sin, cos, atan
+from math import sin, cos, atan, exp
 from mathLib import *
 import AircraftParameters as airMdl
 from Atmos import Atmos
+from Prop import PropSimple as Prop
 from Solver_6DOF import Solver_6DOF
 
 class Controls():
@@ -86,7 +87,7 @@ class AeroModel():
         Vabs = max(1.0,self.Vb.mag())
         #print("Vabs protection") if Vabs == 1.0 else None
         
-        if abs(self.Vb.x) < 1.0:
+        if abs(self.Vb.x) < 5.0:
             self.alpha_r = 0.0 #< No AOA and Sideslip at low speed
             self.beta_r  = 0.0
         else:
@@ -146,7 +147,8 @@ class AeroModel():
         self.Drag = qS * Cd
 
         ## X Axis
-        self.Fb.x  = self.Thrust
+        thrust = Prop.getThrust(self.Thrust, rho=rho)
+        self.Fb.x  = thrust
         self.Fb.x += -self.Lift * sin(self.alpha_r) #< Lift component that pulls back
         self.Fb.x += -self.Drag * cos(self.alpha_r) #< Drag
 
@@ -174,6 +176,7 @@ class AeroModel():
             dt = 0.01
         self.Ab = self.solver.step(Fext, self.Fb, self.T, dt)
 
+        #print("Thrust, RHO: %1.3f, %1.3f"%(thrust, rho))
         #print("AOA,Beta: %1.2f, %1.2f"%(self.alpha_r*RADtoDEG, self.beta_r*RADtoDEG))
         #print("Torque : %s"%(self.T))
         #print("Vb: %s"%(self.Vb))

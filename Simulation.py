@@ -195,7 +195,7 @@ class CockpitView():
         self.horizon.update( roll, pitch )
         self.turn.update( -self.turnRate_rps, sideslip )
         mToFt = 3.2808
-        self.alt.update( ins.height)#*mToFt )
+        self.alt.update( alt_ft )
         #self.mach.update( ins.mach )
         self.gm.update( -9.8*(1 +ins.upAcc/9.81) )
         self.minimap.update(x=ins.east/100, y=-ins.north/100, deg=ins.azimuth)
