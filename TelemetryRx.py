@@ -51,8 +51,8 @@ class Data():
         self.time_Z1 = time.time()
         self.dt = 0.1
         self.data = Buses()
-        self.navion = AeroModel(dt=0.05, altInit_m=20.0, speed_fps=220.0, weight_lbs=2750, units="Metric")
-        self.test   = TestModel(dt=0.05, altInit_m=100.0, speed_fps=220.0, weight_lbs=2750, units="Metric")
+        self.navion = AeroModel(dt=0.05, altInit_m=0*20.0, speed_fps=0*76.0, weight_lbs=2750, units="Metric")
+        self.test   = TestModel(dt=0.05, altInit_m=100.0, speed_fps=76.0, weight_lbs=2750, units="Metric")
         self.rud = 0.0
         
     def getData(self, test=False):

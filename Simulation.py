@@ -110,10 +110,10 @@ class CockpitView():
         """
         ins = newData.ins
         time = newData.time
-        #mpsToKnots = 1.944
-        #speed_knots = mpsToKnots*sqrt(
-        fpsToKnots = 0.59
-        speed_knots = fpsToKnots*sqrt(ins.vel_north**2 +ins.vel_east**2 +ins.vel_up**2)
+        mpsToKnots = 1.944
+        speed_knots = mpsToKnots*sqrt(ins.vel_north**2 +ins.vel_east**2 +ins.vel_up**2)
+        #fpsToKnots = 0.59
+        #speed_knots = fpsToKnots*sqrt(ins.vel_north**2 +ins.vel_east**2 +ins.vel_up**2)
         if speed_knots > 900:
            speed_knots = 900
 
