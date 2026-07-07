@@ -1,6 +1,12 @@
 class Params():
     ## Constants
-    G     =  9.81     #< m/sec^2
+    G          = 9.81      #< m/sec^2
+    WEIGHT     = 1247.0    #< Kg
+    MAX_THRUST = 163.0*3   #< Thrust in Newtons
+    MASS       = WEIGHT/G  #< Aircraft mass
+
+    ALT_INIT    = 1500.0 #< meters
+    V_CRUISE    = 76.0   #< Cruise speed (m/s)
 
     ELV_TRIM_D    =  0.0 #< degrees
     ELV_MAX_ANG_D = 20.0 #< degrees
@@ -11,23 +17,10 @@ class Params():
     RUD_TRIM_D    =  0.0 #< degrees
     RUD_MAX_ANG_D = 20.0 #< degrees
 
-    MAX_THRUST = 1601.36 #< Thrust in Newtons
-
-    ALT_INIT    = 1500.0 #< meters
-    V_CRUISE    = 76.0   #< Cruise speed (m/s)
-
-
-    RHO_0 = 1.225     #<[kg/m3] #< density of air( at sea level and standard pressure )
-    RHO   = RHO_0
-
-
     ## Aircraft Parameters
     _Ixx        = 1285.0 #< Roll inertia (kg*m^2)
     _Iyy        = 1825.0 #< Pitch inertia ( kg*m^2 )
     _Izz        = 2667.0 #< Yaw inertia ( kg*m^2 )
-
-    WEIGHT      = 1247.0 #< Kg
-    MASS        = (WEIGHT/G) #< Aircraft mass
 
     _C          = 1.49 #< Mean aerodynamic chord (m)
     _S          = 17.0 #< Wing area (m^2)
@@ -39,8 +32,8 @@ class Params():
     G_CD_0     = 0.025   #< Drag coefficient
     K          = 0.061   #< Induced Drag Factor
 
-    CL_ALPHA   = 4.44   #< Lift coefficient slope due to AoA (per radian)
-    #CL_DELTA_E = 0.335   #< -0.923 Lift coefficient slope due to elevator deflection (per radian)
+    CL_ALPHA    = 4.44   #< Lift coefficient slope due to AoA (per radian)
+    #CL_DELTA_E = 0.335  #< -0.923 Lift coefficient slope due to elevator deflection (per radian)
 
 
     CM_0       =  0.0    #< Baseline pitching moment coefficient

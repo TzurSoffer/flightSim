@@ -7,6 +7,7 @@
 from math import sin, cos, atan
 from mathLib import *
 import AircraftParameters as airMdl
+from Atmos import Atmos
 from Solver_6DOF import Solver_6DOF
 
 class Controls():
@@ -16,7 +17,7 @@ class Controls():
         self.Rudder_Cmd   = Rudder_Cmd
         self.Throttle_Cmd = Throttle_Cmd
         self.GearExtend_Cmd = int(GearExtend_Cmd)
-        
+
 class AeroModel():
     def __init__(self, dt, altInit_m, speed_fps, weight_lbs, units):
         self.params = airMdl.Params()
@@ -83,7 +84,7 @@ class AeroModel():
         ## Update the airspeed 
         self.Vb = Vec_xyz(*MxV(self.attitude.inv(), self.Ve.getVector()))
         Vabs = max(1.0,self.Vb.mag())
-        print("Vabs protection") if Vabs == 5.0 else None
+        #print("Vabs protection") if Vabs == 1.0 else None
         
         if abs(self.Vb.x) < 1.0:
             self.alpha_r = 0.0 #< No AOA and Sideslip at low speed
@@ -93,7 +94,8 @@ class AeroModel():
             self.beta_r  = min(0.707, max(-0.707, (asin( self.Vb.y/Vabs ))))   #< Limited to +/-45 deg
 
         ##========================== Momenets and rotation============================================================================
-        qS  = 0.5 * self.params.RHO * (Vabs**2) * self.params._S #< S is wing area
+        rho = Atmos.getRho(-self.position.z)
+        qS  = 0.5 * rho * (Vabs**2) * self.params._S #< S is wing area
         _B  = self.params._B
         qSc = qS * self.params._C
         qSb = qS * _B
@@ -214,8 +216,10 @@ class AeroModel():
 
 if __name__ == "__main__":
     mdl = AeroModel(dt=0.1, altInit_m=0.0, speed_fps=210.0, weight_lbs=2750, units="Metric")
-    ctrl = Controls(Elevator_Cmd= 0.9, Aileron_Cmd=-0.0, Rudder_Cmd=.0, Throttle_Cmd=0.0, GearExtend_Cmd=0.0)
+    ctrl = Controls(Elevator_Cmd= 0.01, Aileron_Cmd=-0.0, Rudder_Cmd=.0, Throttle_Cmd=0.0, GearExtend_Cmd=0.0)
     mdl.print()
     for i in range(0,20):
-        mdl.step(ctrl, dt=0.1)
+        mdl.step(ctrl, dt=0.01)
         mdl.print()
+        print("rho (at %d): %1.4f"%(i*2000, Atmos.getRho(i*2000)))
+

@@ -112,8 +112,6 @@ class CockpitView():
         time = newData.time
         mpsToKnots = 1.944
         speed_knots = mpsToKnots*sqrt(ins.vel_north**2 +ins.vel_east**2 +ins.vel_up**2)
-        #fpsToKnots = 0.59
-        #speed_knots = fpsToKnots*sqrt(ins.vel_north**2 +ins.vel_east**2 +ins.vel_up**2)
         if speed_knots > 900:
            speed_knots = 900
 
@@ -199,9 +197,9 @@ class CockpitView():
         mToFt = 3.2808
         self.alt.update( ins.height)#*mToFt )
         #self.mach.update( ins.mach )
-        self.gm.update( -9.8*(1 +ins.upAcc/32) )
+        self.gm.update( -9.8*(1 +ins.upAcc/9.81) )
         self.minimap.update(x=ins.east/100, y=-ins.north/100, deg=ins.azimuth)
-        self.vsi.update( 60*ins.vel_up/1000 )
+        self.vsi.update( mToFt*60*ins.vel_up/1000 )
         self.head.update( ins.azimuth, ins.azimuth )
         self.airSpd.update( speed_knots )
         self.stck.update(x=rollCmd, y=pitchCmd, deg=rudderCmd*20)
