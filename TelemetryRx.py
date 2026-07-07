@@ -51,7 +51,7 @@ class Data():
         self.time_Z1 = time.time()
         self.dt = 0.1
         self.data = Buses()
-        self.navion = AeroModel(dt=0.05, altInit_m=0*20.0, speed_fps=0*76.0, weight_lbs=2750, units="Metric")
+        self.navion = AeroModel(dt=0.05, altInit_m=20.0, speed_fps=76.0, weight_lbs=2750, units="Metric")
         self.test   = TestModel(dt=0.05, altInit_m=100.0, speed_fps=76.0, weight_lbs=2750, units="Metric")
         self.rud = 0.0
         
@@ -78,7 +78,7 @@ class Data():
         elev = -2*(m_data.mousePos[1]/self.scrSize[1] -0.5) #< Stick up is negative
         self.rud = min(1, max(-1, self.rud -0.01*(keys[pygame.K_z] -keys[pygame.K_c]))) #< Rudder left is negative
         self.rud *= (1 -keys[pygame.K_x])
-        cmds.rudderCmd_d = max(-1, min(1, 0.2*roll +self.rud))
+        cmds.rudderCmd_d = max(-1, min(1, 0.1*roll +self.rud))
         sb   = 0.5
 
         throttle = cmds.throttleCmd +0.02*(keys[pygame.K_q] -keys[pygame.K_a])
