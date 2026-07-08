@@ -1,6 +1,6 @@
 import struct
 
-class BusState():
+class State():
     def __init__(self):
         self.timeTag_ms = 0 #< UINT32 Elapsed Time (msec)
 
@@ -30,7 +30,14 @@ class BusState():
         self.fcsFlaps_deg       = 0.0  #< Float 
         self.fcsSpeedbrakes_deg = 0.0  #< Float 
         self.throttleFbk  = 0.0  #< Float 0.0 to 1.0
-        self.gearsDownFbk = 0    #< UINT32 Right-handed rotation around z-axis clockwise from North
+        self.thrust_N= 0.0    #< Float
+        self.fuelLevel = 0.0  #< Float 0.0 to 1.0
+        self.aoa_deg= 0.0    #< Float
+        self.beta_deg= 0.0    #< Float
+        self.gearsDownFbk = 0    #< UINT8
+        self.wowNose = 0    #< UINT8
+        self.wowLeft = 0    #< UINT8
+        self.wowRight= 0    #< UINT8
 
     def serialize(self) ->bytes:
         serialized = []
@@ -62,7 +69,15 @@ class BusState():
         serialized.append(struct.pack('<f', self.fcsFlaps_deg))
         serialized.append(struct.pack('<f', self.fcsSpeedbrakes_deg))
         serialized.append(struct.pack('<f', self.throttleFbk))
-        serialized.append(struct.pack('<I', self.gearsDownFbk))
+        serialized.append(struct.pack('<f', self.thrust_N))
+        serialized.append(struct.pack('<f', self.fuelLevel))
+        serialized.append(struct.pack('<f', self.aoa_deg))
+        serialized.append(struct.pack('<f', self.beta_deg))
+        
+        serialized.append(struct.pack('<B', self.gearsDownFbk))
+        serialized.append(struct.pack('<B', self.wowNose))
+        serialized.append(struct.pack('<B', self.wowLeft))
+        serialized.append(struct.pack('<B', self.wowRight))
         return b''.join(serialized)
 
     def deserialize(self, buf) -> None:
@@ -117,8 +132,23 @@ class BusState():
         offset += 4
         self.throttleFbk = struct.unpack_from('<f', buf, offset)[0]
         offset += 4
-        self.gearsDownFbk = struct.unpack_from('<I', buf, offset)[0]
+        self.thrust_N = struct.unpack_from('<f', buf, offset)[0]
         offset += 4
+        self.fuelLevel = struct.unpack_from('<f', buf, offset)[0]
+        offset += 4
+        self.aoa_deg = struct.unpack_from('<f', buf, offset)[0]
+        offset += 4
+        self.beta_deg = struct.unpack_from('<f', buf, offset)[0]
+        offset += 4
+        
+        self.gearsDownFbk = struct.unpack_from('<B', buf, offset)[0]
+        offset += 1
+        self.wowNose = struct.unpack_from('<B', buf, offset)[0]
+        offset += 1
+        self.wowLeft = struct.unpack_from('<B', buf, offset)[0]
+        offset += 1
+        self.wowRight = struct.unpack_from('<B', buf, offset)[0]
+        offset += 1
 
     def __str__(self):
         s = ""
@@ -150,11 +180,19 @@ class BusState():
         s += "Flaps (deg): %1.2f\n"%self.fcsFlaps_deg
         s += "Speedbrakes (deg): %1.2f\n"%self.fcsSpeedbrakes_deg
         s += "Throttle (%%): %1.2f\n"%(self.throttleFbk*100)
+        s += "Thrust (N): %1.2f\n"%(self.thrust_N)
+        s += "Fuel (%%): %1.2f\n"%(self.fuelLevel*100)
+        s += "AOA (deg): %1.2f\n"%(self.aoa_deg)
+        s += "Beta (deg): %1.2f\n"%(self.beta_deg)
+        
         s += "Gears down (bool): %d\n"%self.gearsDownFbk
+        s += "WOW nose (bool): %d\n"%self.wowNose
+        s += "WOW left (bool): %d\n"%self.wowLeft
+        s += "WOW right(bool): %d\n"%self.wowRight
         return s
         
 if __name__ == "__main__":
-    bus = BusState()
+    bus = State()
     bus.timeTag_ms = 123
     bus.latY_m = 345.0  #< latitude  (m)
     bus.lonX_m = 678.0  #< longitude (m)
@@ -176,13 +214,21 @@ if __name__ == "__main__":
     bus.pitch_rps   = 0.6  #< Right-handed rotation rate around X-axis (rad)
     bus.yaw_rps     = 0.7  #< Right-handed rotation rate around z-axis clockwise from North
 
-    bus.fcsAileron_deg     = 5.0  #< 
+    bus.fcsAileron_deg     =  5.0  #< 
     bus.fcsElevator_deg    = -5.0  #< 
-    bus.fcsRudder_deg      = 2.5  #< 
+    bus.fcsRudder_deg      =  2.5  #< 
     bus.fcsSpeedbrakes_deg = 45.0
     bus.fcsFlaps_deg = 15.0
     bus.throttleFbk = 0.99
+    bus.thrust_N = 120
+    bus.fuelLevel = 0.573
+    bus.aoa_deg = 7.6
+    bus.beta_deg = 1.5
+    
     bus.gearsDownFbk = 1
+    bus.wowNose  = 0
+    bus.wowLeft  = 1
+    bus.wowRight = 0
     pkt = bus.serialize()
     bus.deserialize(pkt)
     print(bus)

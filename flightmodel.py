@@ -12,12 +12,12 @@ from Prop import PropSimple as Prop
 from Solver_6DOF import Solver_6DOF
 
 class Controls():
-    def __init__(self, Elevator_Cmd, Aileron_Cmd, Rudder_Cmd, Throttle_Cmd, GearExtend_Cmd):
-        self.Elevator_Cmd = Elevator_Cmd
-        self.Aileron_Cmd  = Aileron_Cmd
-        self.Rudder_Cmd   = Rudder_Cmd
-        self.Throttle_Cmd = Throttle_Cmd
-        self.GearExtend_Cmd = int(GearExtend_Cmd)
+    def __init__(self, elevatorCmd, aileronCmd, rudderCmd, throttleCmd, gearsDownCmd):
+        self.elevatorCmd = elevatorCmd
+        self.aileronCmd  = aileronCmd
+        self.rudderCmd   = rudderCmd
+        self.throttleCmd = throttleCmd
+        self.gearsDownCmd = int(gearsDownCmd)
 
 class AeroModel():
     def __init__(self, dt, altInit_m, speed_fps, weight_lbs, units):
@@ -35,7 +35,7 @@ class AeroModel():
         self.Ab = Vec_xyz() #< Acceleration (u, v, w)
         self.Fb = Vec_xyz() #< Force (forward, right, down )
         self.Weight = self.params.WEIGHT  #< Weight lbs : mass (lbs/G slugs )
-        self.Thrust = 0.0 
+        self.Thrust_N = 0.0 
 
         self.alpha_r, self.beta_r = (0.0, 0.0)
         self.Lift, self.Drag = (0.0, 0.0)
@@ -67,19 +67,19 @@ class AeroModel():
         self.time += dt
         
         ##================ Controls ================================================================================================
-        self.elevatorCmd  = -(ctrls.Elevator_Cmd * self.params.ELV_MAX_ANG_D ) #< Pitch stick y axis range -1.0 to 1.0
+        self.elevatorCmd  = -(ctrls.elevatorCmd * self.params.ELV_MAX_ANG_D ) #< Pitch stick y axis range -1.0 to 1.0
         self.elevatorCmd += self.elevatorTrim_deg
         self.elevatorCmd *= DEGtoRAD
 
-        self.aileronCmd  = -(ctrls.Aileron_Cmd * self.params.AIL_MAX_ANG_D )   #< Roll stick x axis range -1.0 to 1.0
+        self.aileronCmd  = -(ctrls.aileronCmd * self.params.AIL_MAX_ANG_D )   #< Roll stick x axis range -1.0 to 1.0
         self.aileronCmd += self.aileronTrim_deg
         self.aileronCmd *= DEGtoRAD
 
-        self.rudderCmd  = -(ctrls.Rudder_Cmd * self.params.RUD_MAX_ANG_D )     #< Roll stick x axis range -1.0 to 1.0
+        self.rudderCmd  = -(ctrls.rudderCmd * self.params.RUD_MAX_ANG_D )     #< Roll stick x axis range -1.0 to 1.0
         self.rudderCmd += self.rudderTrim_deg
         self.rudderCmd *= DEGtoRAD
-        self.gearExtendCmd = max(0, min(1, ctrls.GearExtend_Cmd))
-        self.Thrust = ctrls.Throttle_Cmd * self.params.MAX_THRUST              #< Throttle Command setting [ 0, 1]
+        self.gearsDownCmd = max(0, min(1, ctrls.gearsDownCmd))
+        self.Thrust_N = ctrls.throttleCmd * self.params.MAX_THRUST              #< Throttle Command setting [ 0, 1]
 
         ##================== Airspeed, Alpha, Beta, Flight Path ======================================================================
         ## Update the airspeed 
@@ -122,7 +122,7 @@ class AeroModel():
         self.T.q  = Cmde*self.elevatorCmd #< Command to pitch moment
         self.T.q += Cmo +Cma*self.alpha_r #< Wing pitch moment (baseline and angle of attack)
         self.T.q += Cmq*Wq                #< Rate resistance
-        self.T.q += self.gearExtendCmd*Gmo
+        self.T.q += self.gearsDownCmd*Gmo
         self.T.q *= qSc                   #< Factor due to air speed 
         
         ## Z axis 
@@ -143,12 +143,12 @@ class AeroModel():
         CL = self.params.CL_0 +self.params.CL_ALPHA*self.alpha_r
         self.Lift = qS * CL
         Cd = self.params.CD_0 +self.params.K*self.alpha_r #< Prsuming CD_0 and K are normalized to wing area
-        Cd += self.gearExtendCmd*self.params.G_CD_0
+        Cd += self.gearsDownCmd*self.params.G_CD_0
         self.Drag = qS * Cd
 
         ## X Axis
-        thrust = Prop.getThrust(self.Thrust, rho=rho)
-        self.Fb.x  = thrust
+        self.Thrust_N = Prop.getThrust(self.Thrust_N, rho=rho)
+        self.Fb.x  = self.Thrust_N
         self.Fb.x += -self.Lift * sin(self.alpha_r) #< Lift component that pulls back
         self.Fb.x += -self.Drag * cos(self.alpha_r) #< Drag
 

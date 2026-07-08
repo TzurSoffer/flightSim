@@ -46,7 +46,7 @@ class CockpitView():
         vsi_size     = (int(150*scale), int(150*scale))
         head_size    = (int(150*scale), int(150*scale))
         as_size      = (int(150*scale), int(150*scale))
-        mach_size    = (int(150*scale), int(150*scale))
+        gm_size      = (int(150*scale), int(150*scale))
         stick_size   = (int(150*scale), int(150*scale))
         minimap_size = (int(300*scale), int(300*scale))
         bckgnd_size  = (int(750*scale), int(600*scale))
@@ -57,8 +57,8 @@ class CockpitView():
         as_pos      = (world_pos[0] +0, world_pos[1] +world_size[1] +gap)
         horizon_pos = (as_pos[0] +as_size[0] +gap, as_pos[1])
         alt_pos     = (horizon_pos[0] +horizon_size[0] +gap, horizon_pos[1])
-        mach_pos    = (alt_pos[0] +alt_size[0] +gap, alt_pos[1])
-        minimap_pos = (mach_pos[0] +mach_size[0] +gap, mach_pos[1])
+        gm_pos      = (alt_pos[0] +alt_size[0] +gap, alt_pos[1])
+        minimap_pos = (gm_pos[0] +gm_size[0] +gap, gm_pos[1])
 
         turn_pos  = (as_pos[0], as_pos[1] +as_size[1] +gap)
         head_pos  = (turn_pos[0] +turn_size[0] +gap, turn_pos[1])
@@ -79,8 +79,7 @@ class CockpitView():
         self.horizon = AH.ArtificialHorizon( self.screen, pos=horizon_pos, size=horizon_size,
                                              rollToDeg=180/pi, pitchToDeg=180/pi)
         self.alt     = ALT.AltMeter( self.screen, pos=alt_pos, size=alt_size)    
-        #self.mach    = MACH.MachMeter( self.screen, pos=mach_pos, size=mach_size )
-        self.gm      = G.GMeter_Analog( self.screen, pos=mach_pos, size=mach_size )
+        self.gm      = G.GMeter_Analog( self.screen, pos=gm_pos, size=gm_size )
         self.minimap = MAP.Map( screen, pos=minimap_pos, size=minimap_size,
                                 kp = 0.9,
                                 bodyImage=imageLoad("%s/skin/Frame_Rect.png" % path),
@@ -98,7 +97,6 @@ class CockpitView():
                                 mapImage    = imageLoad("%s/skin/Grid_White300x300.png"%path),
                                 markerImage = imageLoad("%s/skin/Joystick_handle_100.png"%path),
                                 )
-
         self.time_Z1 = 0
         self.heading_Z1 = 0
         self.turnRate_rps = 0
@@ -108,19 +106,19 @@ class CockpitView():
         Update all the dials. Usually done in a different rate then the actuale display refresh.
         Also each dial can have a behaviour model (e.g: LPF, Min/Max detectors, Moving-Average, Delay...) 
         """
-        ins = newData.ins
+        state = newData.state
         time = newData.time
         mpsToKnots = 1.944
-        speed_knots = mpsToKnots*sqrt(ins.vel_north**2 +ins.vel_east**2 +ins.vel_up**2)
+        speed_knots = mpsToKnots*sqrt(state.velNorth_mps**2 +state.velEast_mps**2 +state.velUp_mps**2)
         if speed_knots > 900:
            speed_knots = 900
 
-        heading = pi*ins.azimuth/180
-        pitch   = pi*ins.pitch/180
-        roll    = pi*ins.roll/180
+        heading = state.azimuth_r
+        pitch   = state.pitch_r
+        roll    = state.roll_r
 
         mToFt = 3.28
-        alt_ft = mToFt*ins.height
+        alt_ft = mToFt*state.hae_m
 
         dt = time -self.time_Z1
         if dt > 0.005:
@@ -130,38 +128,36 @@ class CockpitView():
         
         cmds = newData.cmds
         throttle = cmds.throttleCmd
-        accZ = ins.upAcc
-        accX = ins.forwardAcc
-        accY = ins.rightAcc
+        accZ = state.accUp_mps2
+        accX = state.accForward_mps2
+        accY = state.accRight_mps2
         sideslip = accY / (sqrt(accZ**2 +accX**2) +0.01) #< Missing g vector
 
-        lElev = cmds.lElevonCmd_d
-        rElev = cmds.rElevonCmd_d
-        rollCmd =  -20*(lElev -rElev)/2
-        pitchCmd = -10*(lElev +rElev)/2
-        rudderCmd = cmds.rudderCmd_d
-        wow  = newData.wow
+        rollCmd   = state.fcsAileron_deg
+        pitchCmd  = state.fcsElevator_deg
+        rudderCmd = state.fcsRudder_deg
 
         ### MODEL TO 3D-GRAPHICS
         ### X-FOWARD, Y-RIGHT, Z-DOWN TO X-RIGHT, Z-UP
-        posFact = 1
-        planeState = PlaneState(north=ins.north, east=ins.east, up=ins.height,
-                                heading_d=-heading*180/pi, pitch_d=pitch*180/pi, roll_d=-roll*180/pi,
+        radToDeg = 180/pi
+        north, east, height = (state.latY_m, state.lonX_m, state.hae_m)
+        planeState = PlaneState(north=north, east=east, up=height,
+                                heading_d=-heading*radToDeg, pitch_d=pitch*radToDeg, roll_d=-roll*radToDeg,
                                 throttle=throttle,
-                                gearsDown_b=cmds.gearExtendCmd_b,
-                                wowNose_b=wow.nose,
-                                wowLeft_b=wow.left,
-                                wowRight_b=wow.right)
+                                gearsDown_b=cmds.gearsDownCmd,
+                                wowNose_b=state.wowNose,
+                                wowLeft_b=state.wowLeft,
+                                wowRight_b=state.wowRight)
 
         if self.cameraMode == "chase":
             cameraDistance = 400
-            worldState = WorldState(translate=(-ins.east, -ins.height, +ins.north), rotate=(0,heading,0)) #< Chase plane
+            worldState = WorldState(translate=(-east, -height, +north), rotate=(0,heading,0)) #< Chase plane
             self.world.update( time, planeState, worldState)
             self.world.world.translate(0,-70,-cameraDistance)
 
         elif self.cameraMode == "pilot":
             cameraDistance = -50 #< Move forward
-            worldState = WorldState(translate=(-ins.east, -ins.height, ins.north))
+            worldState = WorldState(translate=(-east, -height, north))
             self.world.update( time, planeState, worldState)
             self.world.world.rotate(0,heading,0)
             self.world.world.rotate(-pitch,0,0)
@@ -170,20 +166,20 @@ class CockpitView():
 
         elif self.cameraMode == "follow":
             cameraDistance = 1000
-            worldState = WorldState(translate=(-ins.east, -(ins.height +50), ins.north -cameraDistance)) #< Camera relative to airplane
+            worldState = WorldState(translate=(-east, -(height +50), north -cameraDistance)) #< Camera relative to airplane
             self.world.update( time, planeState, worldState)
 
         elif self.cameraMode == "above":
-            cameraAltitude = 10000
-            worldState = WorldState(translate=(-ins.east, -(ins.height +cameraAltitude), ins.north)) #< Camera follow from above
+            cameraAltitude = 8000
+            worldState = WorldState(translate=(-east, -cameraAltitude, north)) #< Camera follow from above
             self.world.update( time, planeState, worldState)
             self.world.world.rotate(pi/2,0,0) #< Look down
 
         elif self.cameraMode == "static":
-            azimuth = atan2(ins.east, ins.north)
-            distance = sqrt((ins.east**2) +(ins.north**2))
+            azimuth = atan2(east, north)
+            distance = sqrt((east**2) +(north**2))
             if abs(distance) > 0.01: 
-                elevation = atan(ins.height/distance)
+                elevation = atan(height/distance)
             else:
                 elevation = pi/2
             worldState = WorldState(translate=(0, 0, 0),rotate=(0, 0, 0)) #< TODO DEBUG ROTATION ORDER
@@ -195,14 +191,15 @@ class CockpitView():
         self.horizon.update( roll, pitch )
         self.turn.update( -self.turnRate_rps, sideslip )
         mToFt = 3.2808
+        azimuth_deg = state.azimuth_r*radToDeg
         self.alt.update( alt_ft )
-        #self.mach.update( ins.mach )
-        self.gm.update( -9.8*(1 +ins.upAcc/9.81) )
-        self.minimap.update(x=ins.east/100, y=-ins.north/100, deg=ins.azimuth)
-        self.vsi.update( mToFt*60*ins.vel_up/1000 )
-        self.head.update( ins.azimuth, ins.azimuth )
+        g = 9.81
+        self.gm.update( -g*(1 +state.accUp_mps2/g) )
+        self.minimap.update(x=east/100, y=-north/100, deg=azimuth_deg)
+        self.vsi.update( mToFt*60*state.velUp_mps/1000 )
+        self.head.update( azimuth_deg, azimuth_deg )
         self.airSpd.update( speed_knots )
-        self.stck.update(x=rollCmd, y=pitchCmd, deg=rudderCmd*20)
+        self.stck.update(x=-10*rollCmd, y=-10*pitchCmd, deg=-10*rudderCmd)
 
     def draw(self):
         """Draw all the dials. The update method should be called before to update all gauges"""
