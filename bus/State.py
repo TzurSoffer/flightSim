@@ -192,7 +192,13 @@ class State():
         return s
         
 if __name__ == "__main__":
+    from TmUDP import *
     bus = State()
+    tm = TmUDP(tm=bus,
+               ip="127.0.0.1",
+               port=5001,
+               nic_ip="",
+               loopbackEnable=True)
     bus.timeTag_ms = 123
     bus.latY_m = 345.0  #< latitude  (m)
     bus.lonX_m = 678.0  #< longitude (m)
@@ -232,3 +238,4 @@ if __name__ == "__main__":
     pkt = bus.serialize()
     bus.deserialize(pkt)
     print(bus)
+    tm.send()
