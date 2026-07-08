@@ -152,43 +152,43 @@ class State():
 
     def __str__(self):
         s = ""
-        s += "Elapsed Time (msec): %d\n"%self.timeTag_ms 
+        s += "u32 Elapsed Time (msec): %d\n"%self.timeTag_ms 
 
-        s += "Latitude-Y (m): %1.6f\n"%self.latY_m
-        s += "Longitude-X (m): %1.6f\n"%self.lonX_m
-        s += "Height above earth (m): %1.2f\n"%self.hae_m 
+        s += "f64 Latitude-Y (m): %1.6f\n"%self.latY_m
+        s += "f64 Longitude-X (m): %1.6f\n"%self.lonX_m
+        s += "f32 Height above earth (m): %1.2f\n"%self.hae_m 
 
-        s += "Velocity North (m/s): %1.2f\n"%self.velNorth_mps
-        s += "Velocity East (m/s): %1.2f\n"%self.velEast_mps
-        s += "Velocity downward (m/s): %1.2f\n"%self.velDown_mps
+        s += "f32 Velocity North (m/s): %1.2f\n"%self.velNorth_mps
+        s += "f32 Velocity East (m/s): %1.2f\n"%self.velEast_mps
+        s += "f32 Velocity downward (m/s): %1.2f\n"%self.velDown_mps
 
-        s += "Accelaration forward (m/s^2): %1.2f\n"%self.accForward_mps2
-        s += "Accelaration right (m/s^2): %1.2f\n"%self.accRight_mps2
-        s += "Accelaration down (m/s^2): %1.2f\n"%self.accDown_mps2
+        s += "f32 Accelaration forward (m/s^2): %1.2f\n"%self.accForward_mps2
+        s += "f32 Accelaration right (m/s^2): %1.2f\n"%self.accRight_mps2
+        s += "f32 Accelaration down (m/s^2): %1.2f\n"%self.accDown_mps2
 
-        s += "Roll (rad): %1.2f\n"%self.roll_r
-        s += "Pitch (rad): %1.2f\n"%self.pitch_r
-        s += "Heading (rad): %1.2f\n"%self.heading_r
+        s += "f32 Roll (rad): %1.2f\n"%self.roll_r
+        s += "f32 Pitch (rad): %1.2f\n"%self.pitch_r
+        s += "f32 Heading (rad): %1.2f\n"%self.heading_r
 
-        s += "Roll rate (rps): %1.2f\n"%self.roll_rps
-        s += "Pitch rate (rps): %1.2f\n"%self.pitch_rps
-        s += "Yaw rate (rps): %1.2f\n"%self.yaw_rps
+        s += "f32 Roll rate (rps): %1.2f\n"%self.roll_rps
+        s += "f32 Pitch rate (rps): %1.2f\n"%self.pitch_rps
+        s += "f32 Yaw rate (rps): %1.2f\n"%self.yaw_rps
 
-        s += "Aileron (deg): %1.2f\n"%self.fcsAileron_deg
-        s += "Elevator (deg): %1.2f\n"%self.fcsElevator_deg
-        s += "Rudder (deg): %1.2f\n"%self.fcsRudder_deg
-        s += "Flaps (deg): %1.2f\n"%self.fcsFlaps_deg
-        s += "Speedbrakes (deg): %1.2f\n"%self.fcsSpeedbrakes_deg
-        s += "Throttle (%%): %1.2f\n"%(self.throttleFbk*100)
-        s += "Thrust (N): %1.2f\n"%(self.thrust_N)
-        s += "Fuel (%%): %1.2f\n"%(self.fuelLevel*100)
-        s += "AOA (deg): %1.2f\n"%(self.aoa_deg)
-        s += "Beta (deg): %1.2f\n"%(self.beta_deg)
+        s += "f32 Aileron (deg): %1.2f\n"%self.fcsAileron_deg
+        s += "f32 Elevator (deg): %1.2f\n"%self.fcsElevator_deg
+        s += "f32 Rudder (deg): %1.2f\n"%self.fcsRudder_deg
+        s += "f32 Flaps (deg): %1.2f\n"%self.fcsFlaps_deg
+        s += "f32 Speedbrakes (deg): %1.2f\n"%self.fcsSpeedbrakes_deg
+        s += "f32 Throttle (%%): %1.2f\n"%(self.throttleFbk*100)
+        s += "f32 Thrust (N): %1.2f\n"%(self.thrust_N)
+        s += "f32 Fuel (%%): %1.2f\n"%(self.fuelLevel*100)
+        s += "f32 AOA (deg): %1.2f\n"%(self.aoa_deg)
+        s += "f32 Beta (deg): %1.2f\n"%(self.beta_deg)
         
-        s += "Gears down (bool): %d\n"%self.gearsDownFbk
-        s += "WOW nose (bool): %d\n"%self.wowNose
-        s += "WOW left (bool): %d\n"%self.wowLeft
-        s += "WOW right(bool): %d\n"%self.wowRight
+        s += "u8  Gears down (bool): %d\n"%self.gearsDownFbk
+        s += "u8  WOW nose (bool): %d\n"%self.wowNose
+        s += "u8  WOW left (bool): %d\n"%self.wowLeft
+        s += "u8  WOW right(bool): %d\n"%self.wowRight
         return s
         
 if __name__ == "__main__":
