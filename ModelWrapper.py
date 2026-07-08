@@ -1,5 +1,5 @@
 """
- * TelemetryRx.py
+ * modelWrapper.py
  * Created on: 8 April 2026
  * Author: Guy Soffer
  * Copyright (C) 2026 Guy Soffer
@@ -42,7 +42,7 @@ class Buses():
             Throttle_Cmd =  0.00,
             GearExtend_Cmd = 0)
     
-class Data():
+class Model():
     """Data source to drive gauges screen"""
     def __init__(self, screen_size):
         self.scrSize = screen_size
@@ -55,7 +55,7 @@ class Data():
         self.test   = TestModel(dt=0.05, altInit_m=100.0, speed_fps=76.0, weight_lbs=2750, units="Metric")
         self.rud = 0.0
         
-    def getData(self, test=False):
+    def step(self, test=False):
         """Generate and return new set of data"""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

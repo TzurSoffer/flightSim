@@ -222,7 +222,7 @@ class CockpitView():
 
 if __name__ == "__main__":
     import time, pygame
-    from TelemetryRx import Data
+    from ModelWrapper import Model
     def help(mode):
         print("Simulation mode: %s"%mode)
         print("Move mouse to control elevator and ailerons")
@@ -242,7 +242,7 @@ if __name__ == "__main__":
     # Initialise Dials.
     path = './'
     cockpit = CockpitView(screen, colorBG=BG_color, scale=1.0, folder=path)
-    data = Data(screen_size)
+    mdl = Model(screen_size)
     clock = Clock()
 
     #mode = "arcade" # False, "navion", "arcade"
@@ -265,11 +265,11 @@ if __name__ == "__main__":
         elif keys[pygame.K_5]:
             cockpit.cameraMode = "static"
         
-        newData = data.getData(test=mode)
+        newState = mdl.step(test=mode)
         calcFrame -= 1
         if calcFrame == 0:
             calcFrame = 5
-            cockpit.update(newData)
+            cockpit.update(newState)
             cockpit.draw()
         else:
             ##print(time.time() -T0)
