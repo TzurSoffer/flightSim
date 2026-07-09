@@ -8,12 +8,12 @@ from mathLib import *
 from Solver_6DOF import Solver_6DOF
 
 class Controls():
-    def __init__(self, Elevator_Cmd, Aileron_Cmd, Rudder_Cmd, Throttle_Cmd, GearExtend_Cmd):
-        self.Elevator_Cmd = Elevator_Cmd
-        self.Aileron_Cmd  = Aileron_Cmd
-        self.Rudder_Cmd   = Rudder_Cmd
-        self.Throttle_Cmd = Throttle_Cmd
-        self.GearExtend_Cmd = int(GearExtend_Cmd)
+    def __init__(self, elevatorCmd, aileronCmd, rudderCmd, throttleCmd, gearsDownCmd):
+        self.elevatorCmd = elevatorCmd
+        self.aileronCmd  = aileronCmd
+        self.rudderCmd   = rudderCmd
+        self.throttleCmd = throttleCmd
+        self.gearsDownCmd = int(gearsDownCmd)
         
 class AeroModel():
     def __init__(self, dt, altInit_m, speed_fps, weight_lbs, units):
@@ -30,12 +30,15 @@ class AeroModel():
         self.Ab = Vec_xyz() #< Acceleration (u, v, w)
         self.Fb = Vec_xyz() #< Force (forward, right, down )
 
-        self.Weight = 1 #weight_lbs  #< Weight lbs : mass (lbs/G slugs )
-
+        self.mass = 1 #weight_lbs  #< Weight lbs : mass (lbs/G slugs )
+        self.Thrust_N = 0.0
+        self.alpha_r = 0.0
+        self.beta_r = 0.0
+        
         self.solver = Solver_6DOF(
             position = self.position, #< All values are passed by reference
             Ve = self.Ve,
-            mass = (self.Weight,),
+            mass = (self.mass,),
             attitude = self.attitude,
             Wb = self.W,
             inertia = Vec_xyz(0.025,0.05,0.05)
@@ -45,6 +48,7 @@ class AeroModel():
         self.aileronCmd  = 0.0 #< Aileron deflection (+/-1)
         self.rudderCmd   = 0.0 #< Rudder deflection (+/-1)
         self.throttleCmd = 0.0 #< Throttle 0 to 1
+        self.gearsDownCmd= 0.0 #< Throttle 0 to 1
 
     def step(self, ctrls, dt=None ):
         dt = self.dt if dt==None else dt
@@ -54,10 +58,10 @@ class AeroModel():
         self.Vb = Vec_xyz(*MxV(self.attitude.inv(), self.Ve.getVector()))
         Vabs = self.Vb.mag()
 
-        self.elevatorCmd = ctrls.Elevator_Cmd
-        self.aileronCmd  = ctrls.Aileron_Cmd
-        self.rudderCmd   = ctrls.Rudder_Cmd
-        self.throttleCmd = ctrls.Throttle_Cmd
+        self.elevatorCmd = ctrls.elevatorCmd
+        self.aileronCmd  = ctrls.aileronCmd
+        self.rudderCmd   = ctrls.rudderCmd
+        self.throttleCmd = ctrls.throttleCmd
 
         ##=======================================================================================================================
         ## Momenets and rotation
@@ -85,7 +89,7 @@ class AeroModel():
         _6DOF_ACTIVE = True
         if _6DOF_ACTIVE:
             self.W.p, self.W.q, self.W.r = 0,0,0
-            Fext = Vec_xyz(0,0,21*self.Weight) 
+            Fext = Vec_xyz(0,0,21*self.mass) 
             self.Ab = self.solver.step(Fext, self.Fb, self.T, dt)
         else:
             self.attitude.roll_r  = 6.28*self.W.p
@@ -136,8 +140,8 @@ class AeroModel():
 
 if __name__ == "__main__":
     mdl = AeroModel(dt=0.1, altInit_m=0.0, speed_fps=210.0, weight_lbs=2750, units="Metric")
-    ctrl = Controls(Elevator_Cmd= 0.9, Aileron_Cmd=-0.0, Rudder_Cmd=.0, Throttle_Cmd=0.0, GearExtend_Cmd=0.0)
+    ctrl = Controls(elevatorCmd=0.1, aileronCmd=-0.0, rudderCmd=0.0, throttleCmd=0.0, gearsDownCmd=0.0)
     mdl.print()
     for i in range(0,20):
-        mdl.step(ctrl, dt=0.1)
+        mdl.step(ctrl, dt=0.05)
         mdl.print()

@@ -9,7 +9,7 @@ import math, sys, time
 import pygame
 from GSOF_Cockpit.GraphicsLib import getMouse
 
-from bus.State import State
+from telemetry.State import State
 from flightmodel import AeroModel, Controls
 from flightmodel_ut import AeroModel as TestModel
 

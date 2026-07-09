@@ -30,6 +30,10 @@ from display.F16_View import F16_View, PlaneState, WorldState
 class CockpitView():
     """Constructs the gauges screen"""
     def __init__(self, screen, pos=(0,0), scale=1.0, colorBG=COLOR.BLACK, gap=0, folder='./'):
+        self.zoom = 0.0
+        self.followDistance = 400
+        self.chaseDistance = 1000
+        self.uavAltitude = 6000
         self.cameraMode = "follow"   
         #self.cameraMode = "static"   
         #self.cameraMode = "chase"   
@@ -150,28 +154,28 @@ class CockpitView():
                                 wowRight_b=state.wowRight)
 
         if self.cameraMode == "chase":
-            cameraDistance = 400
+            self.chaseDistance = max(self.chaseDistance +self.zoom*100, 100)
             worldState = WorldState(translate=(-east, -height, +north), rotate=(0,heading,0)) #< Chase plane
             self.world.update( time, planeState, worldState)
-            self.world.world.translate(0,-70,-cameraDistance)
+            self.world.world.translate(0,-70,-self.chaseDistance)
 
         elif self.cameraMode == "pilot":
-            cameraDistance = -50 #< Move forward
+            pilotDistance = -50 #< Move forward
             worldState = WorldState(translate=(-east, -height, north))
             self.world.update( time, planeState, worldState)
             self.world.world.rotate(0,heading,0)
             self.world.world.rotate(-pitch,0,0)
             self.world.world.rotate(0,0,roll)
-            self.world.world.translate(0,-50,-cameraDistance)
+            self.world.world.translate(0,-50,-pilotDistance)
 
         elif self.cameraMode == "follow":
-            cameraDistance = 1000
-            worldState = WorldState(translate=(-east, -(height +50), north -cameraDistance)) #< Camera relative to airplane
+            self.followDistance = max(self.followDistance +self.zoom*100, 50)
+            worldState = WorldState(translate=(-east, -(height +50), north -self.followDistance)) #< Camera relative to airplane
             self.world.update( time, planeState, worldState)
 
         elif self.cameraMode == "above":
-            cameraAltitude = 8000
-            worldState = WorldState(translate=(-east, -cameraAltitude, north)) #< Camera follow from above
+            self.uavAltitude = max(self.uavAltitude +self.zoom*500, height+100)
+            worldState = WorldState(translate=(-east, -self.uavAltitude, north)) #< Camera follow from above
             self.world.update( time, planeState, worldState)
             self.world.world.rotate(pi/2,0,0) #< Look down
 
@@ -187,7 +191,8 @@ class CockpitView():
             self.world.world.rotate(0, azimuth, 0)    #< 1st azimuth
             self.world.world.rotate(-elevation, 0, 0) #< 2nd elevation
             self.world.world.translate(0, -50, 0)     #< 3rd camera height
-        
+
+        self.zoom = 0
         self.horizon.update( roll, pitch )
         self.turn.update( -self.turnRate_rps, sideslip )
         mToFt = 3.2808
@@ -209,7 +214,6 @@ class CockpitView():
         self.horizon.draw()
         self.turn.draw()
         self.alt.draw()
-        #self.mach.draw()
         self.gm.draw()
         self.minimap.draw()
         self.vsi.draw()
@@ -217,6 +221,15 @@ class CockpitView():
         self.airSpd.draw()
         self.stck.draw()
 
+def getMouseScroll() -> int:
+    for event in pygame.event.get():
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 4:
+                return 1 #< Forward
+            elif event.button == 5:
+                return -1 #< Backward
+    return 0 #< No movement 
+        
 if __name__ == "__main__":
     import time, pygame
     from ModelWrapper import Model
@@ -261,7 +274,9 @@ if __name__ == "__main__":
             cockpit.cameraMode = "above"
         elif keys[pygame.K_5]:
             cockpit.cameraMode = "static"
-        
+
+        cockpit.zoom += getMouseScroll()
+
         newState = mdl.step(test=mode)
         calcFrame -= 1
         if calcFrame == 0:
