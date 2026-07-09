@@ -192,11 +192,19 @@ class State():
         return s
         
 if __name__ == "__main__":
+    import sys
     from TmUDP import *
+    if len(sys.argv) <= 1:
+        toIp = "127.0.0.1"
+        toPort = 5001
+    else:
+        toIp = str(sys.argv[1])
+        toPort = int(sys.argv[2]) if len(sys.argv) > 2 else 5001
+            
     bus = State()
     tm = TmUDP(tm=bus,
-               ip="127.0.0.1",
-               port=5001,
+               ip=toIp,
+               port=toPort,
                nic_ip="",
                loopbackEnable=True)
     bus.timeTag_ms = 123

@@ -4,7 +4,7 @@ import struct, psutil, sys
 def UDP_Socket(ip, port=0, iface="", timeout=0, allGroups=False, mcastLoopbackEnable=True):
     ipAddr = ipaddress.IPv4Address(ip)
     if ipAddr.is_multicast:
-        return UDP_Multicast_Socket(group, port, iface, timeout, allGroups, mcastLoopbackEnable)
+        return UDP_Multicast_Socket(ip, port, iface, timeout, allGroups, mcastLoopbackEnable)
     else:
         return UDP_Unicast_Socket(ip, port, timeout)
 
@@ -32,7 +32,7 @@ class UDP_Unicast_Socket():
             self.sd.sendto(payload, (self.addr_port[0], port))
 
 class UDP_Multicast_Socket(UDP_Unicast_Socket):
-    def __init__(self, group, port, iface="", timeout=0, allGroups=False, loopbackEnable=True):
+    def __init__(self, group, port, iface="", timeout=0, allGroups=False, mcastLoopbackEnable=True):
         """group: An IP address in the multicast range
            port: Port number for the socket connection"""
         print("Multicast socket for GROUP: %s:%d on NIC: %s. All groups %s"%(group, port, iface, allGroups))
