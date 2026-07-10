@@ -36,7 +36,6 @@ Install Python from `http://python.org/`. Tested with versions 3.10 to 3.14.
 - run `pip install pygame-ce` or `pip install pygame`
 - run `pip install GSOF_3dWireFrame`
 - run `pip install GSOF_Cockpit`
-- Clone and install GSOF_Cockpit (`pip install .` or `setup.bat`)
 - Clone flightSim
 - run `python Simulation.py`
 
