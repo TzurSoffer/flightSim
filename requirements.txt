@@ -1,5 +1,5 @@
-GSOF_3D_Wireframe
+GSOF_3DWireframe
 GSOF_Cockpit
-pygame
+pygame-ce
 pymeshlab
 psutil
